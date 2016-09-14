@@ -1,18 +1,41 @@
-var express = require('express')
-var app = express()
+var express = require("express");
+var bunyan = require("bunyan");
+var splunkBunyan = require("splunk-bunyan-logger");
 
-app.set('port', (process.env.PORT || 5000))
-app.use(express.static(__dirname + '/public'))
+// Setup the web app
+var app = express();
+app.set("port", (process.env.PORT || 5000))
+app.use(express.static(__dirname + "/public"))
 
-app.get('/', function(request, response) {
-  response.send('Hello World!')
-})
+// Create the logger
+var splunkStream = splunkBunyan.createStream({
+    "host": "localhost",
+    "token": ""
+});
+var Logger = bunyan.createLogger({
+    name: "my logger",
+    streams: [
+        splunkStream
+    ]
+});
 
-var count = 0;
-app.listen(app.get('port'), function() {
-  console.log("Node app is running at localhost:" + app.get('port'))
-  setInterval(function(){
-    count++;
-    console.log("Interval has run " + count + " times!");
-  }, 500);
-})
+app.get("/", function(request, response) {
+    response.send("Hello World!");
+
+    // Log headers used by the client
+    Logger.info({
+       headers: request.headers
+    }, "Client headers");
+});
+
+app.listen(app.get("port"), function() {
+    // log the port we're using
+    Logger.info("Node.js app is running on port " + app.get("port"));
+
+    // Generate a log message every 1s
+    var count = 0;
+    setInterval(function() {
+        count++;
+        Logger.info("Interval has run " + count + " times");
+    }, 1000);
+});
