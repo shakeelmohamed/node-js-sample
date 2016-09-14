@@ -4,23 +4,24 @@ var splunkBunyan = require("splunk-bunyan-logger");
 
 // Setup the web app
 var app = express();
-app.set("port", (process.env.PORT || 5000))
-app.use(express.static(__dirname + "/public"))
+app.set("port", (process.env.PORT || 3000));
+app.use(express.static(__dirname + "/public"));
 
 // Create the logger
 var splunkStream = splunkBunyan.createStream({
-    "host": "localhost",
+    "url": "https://localhost:8088",
     "token": ""
 });
+
 var Logger = bunyan.createLogger({
-    name: "my logger",
+    name: "Splunk Workshop logger",
     streams: [
         splunkStream
     ]
 });
 
 app.get("/", function(request, response) {
-    response.send("Hello World!");
+    response.send("Hello World! - Node.js demo");
 
     // Log headers used by the client
     Logger.info({
