@@ -14,5 +14,5 @@ app.listen(app.get('port'), function() {
   setInterval(function(){
     count++;
     console.log("Interval has run " + count + " times!");
-  }, 500);
+  }, 1000);
 })
